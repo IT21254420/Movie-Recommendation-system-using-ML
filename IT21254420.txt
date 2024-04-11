@@ -1,0 +1,130 @@
+01.
+CREATE OR REPLACE PROCEDURE UpdateCourse(name_in VARCHAR2) 
+IS
+cnumber NUMBER
+CURSOR c1 IS 
+SELECT course_name
+FROM Course
+WHERE course_name = name in;
+BEGIN
+OPEN c1;
+FETCH c1 INTO cnumber;
+
+IF c1%NOTFOUD THEN
+	cnumber :=10000;
+END IF
+INSERT INTO student_courses(course_name, course_number)
+VALUE(name_in, cnumber);
+commit;
+CLOSE c1;
+END;
+/
+
+DROP PROCEDURE UpdateCourse;
+
+
+02.
+CREATE OR REPLACE TRIGGER trig1  
+BEFORE
+INSERT OR UPDATE OR DELETE
+ON CUSTOMER  
+FOR EACH ROW 
+WHEN (NEW.ID > 0)   
+DECLARE 
+   salary_difference NUMBER; 
+BEGIN  
+   salary_difference = NEW.salary - OLD.salary;
+   dbms_output.put_line('Old salary' || OLD.salary);
+   dbms_output.put_line('New salary' || NEW.salary);
+   dbms_output.put_line('Salary difference' || salary_difference);
+END;
+/
+
+
+03.
+a).
+DECLARE
+CURSOR employee_cur IS
+SELECT emp_id, Name, TRUNC(Months_between(SYSDATE, hire_date) / 12) expr
+FROM Employee;
+
+incre_per NUMBER(2);
+BEGIN
+	dbms_output.put_line(rpad('Employee ID',15)||rpad('Name',25) || 'Increment %');
+	dbms_output.Put_line('-----------------------------------------------------------');
+	FOR store_emp_rec IN employees_cur 
+  	LOOP
+   	 incre_per :=
+    	 CASE
+	 WHEN store_emp_rec.expr > 10 THEN
+		15
+	 WHEN store_emp_rec.expr > 5 THEN
+		10
+	 ELSE
+		8
+	 END;
+	UPDATE Employee
+	SET salary = salary + (salary * incre_per / 100)
+	WHERE emp_id = store_emp_rec.emp_id;
+	END LOOP;
+END;
+/
+
+
+b). 
+DECLARE
+id NUMBER
+name VARCHAR2
+jobid VARCHAR2
+date DATE
+CURSOR c1 IS 
+SELECT emp_id, Name, Jobid, hire_date
+FROM Employee;
+
+BEGIN
+OPEN c1;
+FETCH c1 INTO id, name, jobid, date;
+CLOSE c1;
+END;
+/
+
+
+c).
+DECLARE
+CURSOR c2 IS 
+SELECT emp_id, salary
+FROM Employee
+WHERE department_id = 50
+FOR UPDATE;
+
+BEGIN
+ FOR employee_rec IN employee_cur LOOP
+        IF employee_rec.salary < 15000 THEN
+          incr_sal := .15;
+        ELSE
+          incr_sal := .10;
+        END IF;
+
+UPDATE Employee 
+SET salary = salary + salary * incr_sal 
+WHERE CURRENT OF c2;
+END LOOP;
+END;
+/
+
+d).
+DECLARE
+    var_record       employees%ROWTYPE;
+    CURSOR cur_test (max_sal NUMBER) IS
+    SELECT * FROM employees WHERE salary < max_sal;
+BEGIN
+    OPEN cur_test(5800);
+    LOOP
+        FETCH cur_test INTO var_record;
+        EXIT WHEN cur_test%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Name: ' || var_record.first_name || chr(9)||' salary: '
+            || var_record.salary);
+    END LOOP;
+    CLOSE cur_test;
+END;
+/
